@@ -226,6 +226,10 @@
   </div>
 </noscript>
 
+<div style="position:fixed;right:8px;bottom:8px;font-size:10px;color:#9aa8b5;z-index:9999;">
+  LIFF v20260924-3
+</div>
+
 <div class="page">
 
   <div class="card">
@@ -405,9 +409,6 @@
      LINE LIFF SDK
 ============================== -->
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-
 <script>
 
 /* =====================================================
@@ -416,6 +417,55 @@
 
 const LIFF_ID =
   "2011388395-xENMZYMD";
+
+let liffSdkPromise = null;
+
+function loadLiffSdk_(){
+
+  if(window.liff){
+    return Promise.resolve();
+  }
+
+  if(liffSdkPromise){
+    return liffSdkPromise;
+  }
+
+  liffSdkPromise =
+    new Promise(function(resolve,reject){
+
+      const script =
+        document.createElement("script");
+
+      script.src =
+        "https://static.line-scdn.net/liff/edge/2/sdk.js";
+
+      script.async = true;
+
+      script.onload =
+        function(){
+
+          if(window.liff){
+            resolve();
+          }else{
+            reject(
+              new Error("LIFF SDK 載入完成但無法使用")
+            );
+          }
+        };
+
+      script.onerror =
+        function(){
+          reject(
+            new Error("LIFF SDK 載入失敗")
+          );
+        };
+
+      document.head.appendChild(script);
+    });
+
+  return liffSdkPromise;
+}
+
 
 
 /* =====================================================
@@ -587,7 +637,27 @@ document.querySelectorAll(".language-button").forEach(function(button) {
     );
 
     if(!lineReady){
-      await initializeLiff();
+
+      try{
+        await loadLiffSdk_();
+        await initializeLiff();
+
+      }catch(error){
+
+        setStatus(
+          getVerifyText("liffFailed") +
+          (
+            error && error.message
+              ? error.message
+              : ""
+          ),
+          "error"
+        );
+
+        verifyButton.disabled = true;
+        verifyButton.textContent =
+          getVerifyText("unavailable");
+      }
     }
   });
 });
@@ -632,7 +702,7 @@ async function initializeLiff() {
   try {
 
     if (typeof liff === "undefined") {
-      throw new Error("LIFF SDK 載入失敗");
+      throw new Error("LIFF SDK 尚未載入");
     }
 
     if(currentLanguage){ setStatus(getVerifyText("connecting"), ""); }
@@ -947,7 +1017,23 @@ window.addEventListener(
     ){
       statusEl.style.display = "block";
       languagePanel.style.display = "none";
-      initializeLiff();
+
+      loadLiffSdk_()
+        .then(function(){
+          return initializeLiff();
+        })
+        .catch(function(error){
+          setStatus(
+            "LINE 驗證元件載入失敗：" +
+            (
+              error && error.message
+                ? error.message
+                : ""
+            ),
+            "error"
+          );
+        });
+
       return;
     }
 
