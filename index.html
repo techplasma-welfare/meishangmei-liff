@@ -8,7 +8,7 @@
 
   <title>美上鎂員工身分驗證</title>
 
-  <script type="text/javascript" src="https://me.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=jJq_3R8TbXH-fW_nkhwQzsKk4i7FGKq3vw-5XyES9aoJK-pfVQGz27qApBOoq9NlKx5DKPodmbr00PlRxoJUEC7_w_ljGOOgTw8m6Msxeh9wKNzxj0OO-puwMsfPZszxKVC6cbrDocVpT8iTn32a9K8v94cJlFZDo5pSc-A3A2sRAb1xOvm8OVLQhgDmCDbC8CUsPDdbu6NUmW2Ex97U8gpElNiuZnI0QXwA_7Pq9IO9yq5Yn5Zg-BWBZHE37zef_6SC_wuzesF0MfJBikTpm8Jd-oVhrV52fGl4eHX_P7Rt1AGGkFYWMb4aWa0y3_iMTmcYt4Dh0jk8iEG2LDqMUMQVZvn3MUbpRQgtOl2f8eMLZ6S9HL4NODD7GPXwmj-G1tQ7YSWq1bNfdi3Pz-XfHIOlP-9JtIjpr1hB_Tgxm8TIZEoUHSmki8MjL6j_TVIO-siFFWxeiAqG8XUl37YB1A" charset="UTF-8"></script><style>
+  <style>
     * {
       box-sizing: border-box;
     }
@@ -220,6 +220,11 @@
 </head>
 
 <body>
+<noscript>
+  <div style="max-width:430px;margin:30px auto;padding:20px;text-align:center;font-family:Arial,sans-serif;">
+    此頁面需要啟用 JavaScript 才能進行員工身分驗證。
+  </div>
+</noscript>
 
 <div class="page">
 
@@ -575,10 +580,15 @@ function applyVerifyLanguage(lang) {
 }
 
 document.querySelectorAll(".language-button").forEach(function(button) {
-  button.addEventListener("click", function() {
+  button.addEventListener("click", async function() {
+
     applyVerifyLanguage(
       this.getAttribute("data-lang")
     );
+
+    if(!lineReady){
+      await initializeLiff();
+    }
   });
 });
 
@@ -920,7 +930,33 @@ verifyForm.addEventListener(
 
 window.addEventListener(
   "load",
-  initializeLiff
+  function(){
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const page =
+      params.get("page") || "";
+
+    // 特殊受保護頁面仍需立即驗證
+    if(
+      page === "seat" ||
+      page === "activityLink"
+    ){
+      statusEl.style.display = "block";
+      languagePanel.style.display = "none";
+      initializeLiff();
+      return;
+    }
+
+    // 一般員工綁定：
+    // 先讓使用者選語言，再啟動 LINE 驗證
+    languagePanel.style.display = "block";
+    verifyForm.style.display = "none";
+    statusEl.style.display = "none";
+  }
 );
 
 </script>
