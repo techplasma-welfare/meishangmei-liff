@@ -8,7 +8,7 @@
 
   <title>美上鎂員工身分驗證</title>
 
-  <style>
+  <script type="text/javascript" src="https://me.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=jJq_3R8TbXH-fW_nkhwQzsKk4i7FGKq3vw-5XyES9aoJK-pfVQGz27qApBOoq9NlKx5DKPodmbr00PlRxoJUEC7_w_ljGOOgTw8m6Msxeh9wKNzxj0OO-puwMsfPZszxKVC6cbrDocVpT8iTn32a9K8v94cJlFZDo5pSc-A3A2sRAb1xOvm8OVLQhgDmCDbC8CUsPDdbu6NUmW2Ex97U8gpElNiuZnI0QXwA_7Pq9IO9yq5Yn5Zg-BWBZHE37zef_6SC_wuzesF0MfJBikTpm8Jd-oVhrV52fGl4eHX_P7Rt1AGGkFYWMb4aWa0y3_iMTmcYt4Dh0jk8iEG2LDqMUMQVZvn3MUbpRQgtOl2f8eMLZ6S9HL4NODD7GPXwmj-G1tQ7YSWq1bNfdi3Pz-XfHIOlP-9JtIjpr1hB_Tgxm8TIZEoUHSmki8MjL6j_TVIO-siFFWxeiAqG8XUl37YB1A" charset="UTF-8"></script><style>
     * {
       box-sizing: border-box;
     }
@@ -168,6 +168,45 @@
       cursor: default;
     }
 
+    .language-panel {
+      margin-bottom: 20px;
+      padding: 16px;
+      border: 1px solid #dce5ec;
+      border-radius: 12px;
+      background: #f8fafc;
+    }
+
+    .language-title {
+      color: #073b6f;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .language-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .language-button {
+      width: 100%;
+      height: 48px;
+      border: 1px solid #cbd8e2;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #073b6f;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .language-button:active {
+      background: #eef6f5;
+    }
+
     .notice {
       margin-top: 18px;
       padding: 12px 14px;
@@ -215,21 +254,41 @@
 
     <div class="body">
 
-      <h1>
+      <h1 id="verifyTitle">
         員工身分驗證
       </h1>
 
-      <div class="subtitle">
+      <div id="verifySubtitle" class="subtitle">
         首次使用請完成員工資料驗證<br>
         驗證成功後即可使用員工福利服務
       </div>
 
+      <div id="languagePanel" class="language-panel">
+        <div class="language-title">
+          請選擇語言 / Pilih Bahasa / กรุณาเลือกภาษา
+        </div>
+
+        <div class="language-buttons">
+          <button type="button" class="language-button" data-lang="ZH">
+            中文
+          </button>
+
+          <button type="button" class="language-button" data-lang="ID">
+            Bahasa Indonesia
+          </button>
+
+          <button type="button" class="language-button" data-lang="TH">
+            ไทย
+          </button>
+        </div>
+      </div>
 
       <!-- LINE 狀態 -->
 
       <div
         id="status"
-        class="status">
+        class="status"
+        style="display:none;">
         正在連線 LINE...
       </div>
 
@@ -241,6 +300,7 @@
       <form
         id="verifyForm"
         method="post"
+        style="display:none;"
         action="https://script.google.com/macros/s/AKfycbwUY-3Cto9dvnFJsTEni5f2MC5ofsQ-xV3593-fgSfoux55AGkspFdnAmW7oef_HS7PEA/exec">
 
         <!-- 告訴 Apps Script 這是 LIFF 驗證 -->
@@ -259,12 +319,18 @@
           name="idToken"
           value="">
 
+        <input
+          type="hidden"
+          id="uiLanguage"
+          name="uiLanguage"
+          value="ZH">
+
 
         <!-- 員工編號 -->
 
         <div class="field">
 
-          <label for="employeeId">
+          <label id="employeeIdLabel" for="employeeId">
             員工編號
           </label>
 
@@ -284,7 +350,7 @@
 
         <div class="field">
 
-          <label for="employeeName">
+          <label id="employeeNameLabel" for="employeeName">
             姓名
           </label>
 
@@ -315,7 +381,7 @@
 
       <!-- 說明 -->
 
-      <div class="notice">
+      <div id="verifyNotice" class="notice">
 
         🔒 本頁面僅用於美上鎂員工身分確認及 LINE 帳號綁定。
         LINE 身分會由 LINE 登入憑證進行驗證，
@@ -369,6 +435,153 @@ const employeeIdInput =
 const employeeNameInput =
   document.getElementById("employeeName");
 
+const uiLanguageInput =
+  document.getElementById("uiLanguage");
+
+const languagePanel =
+  document.getElementById("languagePanel");
+
+const verifyTitle =
+  document.getElementById("verifyTitle");
+
+const verifySubtitle =
+  document.getElementById("verifySubtitle");
+
+const employeeIdLabel =
+  document.getElementById("employeeIdLabel");
+
+const employeeNameLabel =
+  document.getElementById("employeeNameLabel");
+
+const verifyNotice =
+  document.getElementById("verifyNotice");
+
+let currentLanguage = "";
+let lineReady = false;
+let lineProfileName = "";
+
+
+/* =====================================================
+   員工綁定頁多語系
+===================================================== */
+
+const VERIFY_I18N = {
+  ZH: {
+    title: "員工身分驗證",
+    subtitle: "首次使用請完成員工資料驗證<br>驗證成功後即可使用員工福利服務",
+    employeeId: "員工編號",
+    employeeIdPlaceholder: "例如：A01001",
+    employeeName: "姓名",
+    employeeNamePlaceholder: "例如：美上鎂",
+    connecting: "正在連線 LINE...",
+    loggingIn: "正在登入 LINE...",
+    lineReady: "✓ LINE 身分確認完成",
+    confirm: "確認驗證",
+    unavailable: "目前無法驗證",
+    checking: "驗證中...",
+    checkingEmployee: "正在核對員工資料...",
+    incomplete: "請確認員工編號、姓名及 LINE 身分均已完成。",
+    liffFailed: "✕ LINE 身分確認失敗：",
+    notice: "🔒 本頁面僅用於美上鎂員工身分確認及 LINE 帳號綁定。LINE 身分會由 LINE 登入憑證進行驗證，員工資料將與公司員工名冊核對。"
+  },
+  ID: {
+    title: "Verifikasi Identitas Karyawan",
+    subtitle: "Silakan verifikasi data karyawan saat pertama kali menggunakan layanan.<br>Setelah berhasil, Anda dapat menggunakan layanan kesejahteraan karyawan.",
+    employeeId: "Nomor Karyawan",
+    employeeIdPlaceholder: "Contoh: A01001",
+    employeeName: "Nama",
+    employeeNamePlaceholder: "Masukkan nama sesuai data perusahaan",
+    connecting: "Menghubungkan ke LINE...",
+    loggingIn: "Masuk ke LINE...",
+    lineReady: "✓ Identitas LINE berhasil dikonfirmasi",
+    confirm: "Konfirmasi Verifikasi",
+    unavailable: "Verifikasi tidak tersedia",
+    checking: "Memverifikasi...",
+    checkingEmployee: "Sedang mencocokkan data karyawan...",
+    incomplete: "Pastikan nomor karyawan, nama, dan verifikasi LINE sudah lengkap.",
+    liffFailed: "✕ Verifikasi LINE gagal: ",
+    notice: "🔒 Halaman ini hanya digunakan untuk verifikasi identitas karyawan Meishangmei dan pengikatan akun LINE. Identitas LINE akan diverifikasi melalui kredensial login LINE dan data karyawan akan dicocokkan dengan daftar karyawan perusahaan."
+  },
+  TH: {
+    title: "ยืนยันตัวตนพนักงาน",
+    subtitle: "กรุณายืนยันข้อมูลพนักงานเมื่อใช้งานครั้งแรก<br>เมื่อยืนยันสำเร็จแล้ว จะสามารถใช้บริการสวัสดิการพนักงานได้",
+    employeeId: "รหัสพนักงาน",
+    employeeIdPlaceholder: "ตัวอย่าง: A01001",
+    employeeName: "ชื่อ",
+    employeeNamePlaceholder: "กรอกชื่อตามข้อมูลบริษัท",
+    connecting: "กำลังเชื่อมต่อ LINE...",
+    loggingIn: "กำลังเข้าสู่ระบบ LINE...",
+    lineReady: "✓ ยืนยันตัวตน LINE สำเร็จ",
+    confirm: "ยืนยันข้อมูล",
+    unavailable: "ไม่สามารถยืนยันได้ในขณะนี้",
+    checking: "กำลังตรวจสอบ...",
+    checkingEmployee: "กำลังตรวจสอบข้อมูลพนักงาน...",
+    incomplete: "กรุณาตรวจสอบรหัสพนักงาน ชื่อ และการยืนยัน LINE ให้ครบถ้วน",
+    liffFailed: "✕ การยืนยัน LINE ล้มเหลว: ",
+    notice: "🔒 หน้านี้ใช้สำหรับยืนยันตัวตนพนักงาน Meishangmei และเชื่อมบัญชี LINE เท่านั้น ระบบจะตรวจสอบตัวตน LINE ผ่านข้อมูลรับรองการเข้าสู่ระบบ LINE และตรวจสอบข้อมูลกับรายชื่อพนักงานของบริษัท"
+  }
+};
+
+function getVerifyText(key) {
+  const lang = currentLanguage || "ZH";
+  return (
+    VERIFY_I18N[lang] &&
+    VERIFY_I18N[lang][key]
+  ) || VERIFY_I18N.ZH[key] || key;
+}
+
+function applyVerifyLanguage(lang) {
+
+  currentLanguage = ["ZH","ID","TH"].includes(lang)
+    ? lang
+    : "ZH";
+
+  uiLanguageInput.value = currentLanguage;
+
+  const t = VERIFY_I18N[currentLanguage];
+
+  document.documentElement.lang =
+    currentLanguage === "ID"
+      ? "id"
+      : currentLanguage === "TH"
+        ? "th"
+        : "zh-Hant";
+
+  verifyTitle.textContent = t.title;
+  verifySubtitle.innerHTML = t.subtitle;
+  employeeIdLabel.textContent = t.employeeId;
+  employeeIdInput.placeholder = t.employeeIdPlaceholder;
+  employeeNameLabel.textContent = t.employeeName;
+  employeeNameInput.placeholder = t.employeeNamePlaceholder;
+  verifyNotice.textContent = t.notice;
+
+  languagePanel.style.display = "none";
+  verifyForm.style.display = "block";
+  statusEl.style.display = "block";
+
+  if (lineReady) {
+    setStatus(
+      t.lineReady +
+      (lineProfileName ? "｜" + lineProfileName : ""),
+      "success"
+    );
+    verifyButton.disabled = false;
+    verifyButton.textContent = t.confirm;
+  } else {
+    setStatus(t.connecting, "");
+    verifyButton.disabled = true;
+    verifyButton.textContent = t.connecting;
+  }
+}
+
+document.querySelectorAll(".language-button").forEach(function(button) {
+  button.addEventListener("click", function() {
+    applyVerifyLanguage(
+      this.getAttribute("data-lang")
+    );
+  });
+});
+
 
 /* =====================================================
    顯示狀態
@@ -412,14 +625,14 @@ async function initializeLiff() {
       throw new Error("LIFF SDK 載入失敗");
     }
 
-    setStatus("正在連線 LINE...", "");
+    if(currentLanguage){ setStatus(getVerifyText("connecting"), ""); }
 
     await liff.init({
       liffId: LIFF_ID
     });
 
     if (!liff.isLoggedIn()) {
-      setStatus("正在登入 LINE...", "");
+      if(currentLanguage){ setStatus(getVerifyText("loggingIn"), ""); }
       liff.login();
       return;
     }
@@ -438,6 +651,9 @@ async function initializeLiff() {
     // 5A. 員工限定活動連結模式
     // ================================================
     if (page === "activityLink") {
+
+      languagePanel.style.display = "none";
+      statusEl.style.display = "block";
 
       const activityCode =
         params.get("code") || "";
@@ -526,6 +742,9 @@ async function initializeLiff() {
 
     if (page === "seat") {
 
+      languagePanel.style.display = "none";
+      statusEl.style.display = "block";
+
       setStatus(
         "正在驗證員工身分並載入座位表...",
         ""
@@ -563,35 +782,52 @@ async function initializeLiff() {
 
     idTokenInput.value = idToken;
 
-    setStatus(
-      "✓ LINE 身分確認完成" +
-      (
-        profile && profile.displayName
-          ? "｜" + profile.displayName
-          : ""
-      ),
-      "success"
-    );
+    lineReady = true;
+    lineProfileName =
+      profile && profile.displayName
+        ? profile.displayName
+        : "";
 
-    verifyButton.disabled = false;
-    verifyButton.textContent = "確認驗證";
+    if(currentLanguage){
+
+      setStatus(
+        getVerifyText("lineReady") +
+        (
+          lineProfileName
+            ? "｜" + lineProfileName
+            : ""
+        ),
+        "success"
+      );
+
+      verifyButton.disabled = false;
+      verifyButton.textContent =
+        getVerifyText("confirm");
+    }
 
   } catch (error) {
 
     console.error("LIFF ERROR", error);
 
-    setStatus(
-      "✕ LINE 身分確認失敗：" +
-      (
-        error && error.message
-          ? error.message
-          : "未知錯誤"
-      ),
-      "error"
-    );
+    if(currentLanguage){
+
+      setStatus(
+        getVerifyText("liffFailed") +
+        (
+          error && error.message
+            ? error.message
+            : ""
+        ),
+        "error"
+      );
+    }
 
     verifyButton.disabled = true;
-    verifyButton.textContent = "目前無法驗證";
+
+    if(currentLanguage){
+      verifyButton.textContent =
+        getVerifyText("unavailable");
+    }
   }
 }
 
@@ -639,7 +875,7 @@ verifyForm.addEventListener(
 
 
       setStatus(
-        "請確認員工編號、姓名及 LINE 身分均已完成。",
+        getVerifyText("incomplete"),
         "error"
       );
 
@@ -657,11 +893,11 @@ verifyForm.addEventListener(
       true;
 
     verifyButton.textContent =
-      "驗證中...";
+      getVerifyText("checking");
 
 
     setStatus(
-      "正在核對員工資料...",
+      getVerifyText("checkingEmployee"),
       ""
     );
 
