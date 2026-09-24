@@ -360,14 +360,14 @@
         <div class="field">
 
           <label id="employeeNameLabel" for="employeeName">
-            姓名
+            姓名／別名
           </label>
 
           <input
             id="employeeName"
             name="employeeName"
             type="text"
-            placeholder="例如：美上鎂"
+            placeholder="例如：美上鎂 或 MUHAMMAD ROBI"
             autocomplete="off"
             required>
 
@@ -526,8 +526,8 @@ const VERIFY_I18N = {
     subtitle: "首次使用請完成員工資料驗證<br>驗證成功後即可使用員工福利服務",
     employeeId: "員工編號",
     employeeIdPlaceholder: "例如：A01001",
-    employeeName: "姓名",
-    employeeNamePlaceholder: "例如：美上鎂",
+    employeeName: "姓名／別名",
+    employeeNamePlaceholder: "例如：美上鎂 或 MUHAMMAD ROBI",
     connecting: "正在連線 LINE...",
     loggingIn: "正在登入 LINE...",
     lineReady: "✓ LINE 身分確認完成",
@@ -535,7 +535,7 @@ const VERIFY_I18N = {
     unavailable: "目前無法驗證",
     checking: "驗證中...",
     checkingEmployee: "正在核對員工資料...",
-    incomplete: "請確認員工編號、姓名及 LINE 身分均已完成。",
+    incomplete: "請確認員工編號、姓名／別名及 LINE 身分均已完成。",
     liffFailed: "✕ LINE 身分確認失敗：",
     notice: "🔒 本頁面僅用於美上鎂員工身分確認及 LINE 帳號綁定。LINE 身分會由 LINE 登入憑證進行驗證，員工資料將與公司員工名冊核對。"
   },
@@ -544,8 +544,8 @@ const VERIFY_I18N = {
     subtitle: "Silakan verifikasi data karyawan saat pertama kali menggunakan layanan.<br>Setelah berhasil, Anda dapat menggunakan layanan kesejahteraan karyawan.",
     employeeId: "Nomor Karyawan",
     employeeIdPlaceholder: "Contoh: A01001",
-    employeeName: "Nama",
-    employeeNamePlaceholder: "Masukkan nama sesuai data perusahaan",
+    employeeName: "Nama / Nama Panggilan",
+    employeeNamePlaceholder: "Contoh: MUHAMMAD ROBI",
     connecting: "Menghubungkan ke LINE...",
     loggingIn: "Masuk ke LINE...",
     lineReady: "✓ Identitas LINE berhasil dikonfirmasi",
@@ -553,7 +553,7 @@ const VERIFY_I18N = {
     unavailable: "Verifikasi tidak tersedia",
     checking: "Memverifikasi...",
     checkingEmployee: "Sedang mencocokkan data karyawan...",
-    incomplete: "Pastikan nomor karyawan, nama, dan verifikasi LINE sudah lengkap.",
+    incomplete: "Pastikan nomor karyawan, nama/nama panggilan, dan verifikasi LINE sudah lengkap.",
     liffFailed: "✕ Verifikasi LINE gagal: ",
     notice: "🔒 Halaman ini hanya digunakan untuk verifikasi identitas karyawan Meishangmei dan pengikatan akun LINE. Identitas LINE akan diverifikasi melalui kredensial login LINE dan data karyawan akan dicocokkan dengan daftar karyawan perusahaan."
   },
@@ -562,8 +562,8 @@ const VERIFY_I18N = {
     subtitle: "กรุณายืนยันข้อมูลพนักงานเมื่อใช้งานครั้งแรก<br>เมื่อยืนยันสำเร็จแล้ว จะสามารถใช้บริการสวัสดิการพนักงานได้",
     employeeId: "รหัสพนักงาน",
     employeeIdPlaceholder: "ตัวอย่าง: A01001",
-    employeeName: "ชื่อ",
-    employeeNamePlaceholder: "กรอกชื่อตามข้อมูลบริษัท",
+    employeeName: "ชื่อ / ชื่อเรียก",
+    employeeNamePlaceholder: "ตัวอย่าง: SOMCHAI PRASERT",
     connecting: "กำลังเชื่อมต่อ LINE...",
     loggingIn: "กำลังเข้าสู่ระบบ LINE...",
     lineReady: "✓ ยืนยันตัวตน LINE สำเร็จ",
@@ -571,7 +571,7 @@ const VERIFY_I18N = {
     unavailable: "ไม่สามารถยืนยันได้ในขณะนี้",
     checking: "กำลังตรวจสอบ...",
     checkingEmployee: "กำลังตรวจสอบข้อมูลพนักงาน...",
-    incomplete: "กรุณาตรวจสอบรหัสพนักงาน ชื่อ และการยืนยัน LINE ให้ครบถ้วน",
+    incomplete: "กรุณาตรวจสอบรหัสพนักงาน ชื่อ/ชื่อเรียก และการยืนยัน LINE ให้ครบถ้วน",
     liffFailed: "✕ การยืนยัน LINE ล้มเหลว: ",
     notice: "🔒 หน้านี้ใช้สำหรับยืนยันตัวตนพนักงาน Meishangmei และเชื่อมบัญชี LINE เท่านั้น ระบบจะตรวจสอบตัวตน LINE ผ่านข้อมูลรับรองการเข้าสู่ระบบ LINE และตรวจสอบข้อมูลกับรายชื่อพนักงานของบริษัท"
   }
